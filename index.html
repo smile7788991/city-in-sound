@@ -1,0 +1,1477 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>听见城市 CITY IN SOUND</title>
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<div class="app" id="app">
+
+  <!-- ============================================================
+       VIEW: 发现 — 福州声音地图
+       ============================================================ -->
+  <section class="view active" id="view-discover">
+    <div class="topbar">
+      <div>
+        <div class="brand-name">
+          听见城市
+          <span class="en">CITY IN SOUND</span>
+        </div>
+      </div>
+      <div class="city-pill">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        福州
+      </div>
+    </div>
+
+    <div class="page">
+      <div class="discover-hero">
+        <div class="guide-text">在熟悉的城市里，听见另一面</div>
+      </div>
+
+      <!-- Map (real Fuzhou administrative boundary rendered by fuzhou-map.js) -->
+      <div class="map-wrap" id="mapWrap">
+        <!-- SVG boundary + sound points injected here by renderRealMap() -->
+      </div>
+
+      <!-- Category filter -->
+      <div class="filter-bar" id="filterBar">
+        <span class="tag active" data-cat="all">全部</span>
+        <span class="tag nature" data-cat="nature">自然</span>
+        <span class="tag city" data-cat="city">城市生活</span>
+        <span class="tag culture" data-cat="culture">人文</span>
+      </div>
+
+      <!-- Nearby sounds -->
+      <div class="section-head">
+        <h3>附近声音</h3>
+        <span class="more" onclick="viewAllSounds()">查看全部 ›</span>
+      </div>
+      <div class="nearby-list" id="nearbyList"></div>
+
+      <!-- Wander entry -->
+      <div class="wander-entry" onclick="goView('wander')">
+        <div class="we-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/></svg>
+        </div>
+        <div class="we-text">
+          <div class="t">声音漫游</div>
+          <div class="d">跟着主题路线，连续聆听城市</div>
+        </div>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--primary)"><path d="M9 18l6-6-6-6"/></svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       VIEW: 声音库 — 城市声音档案
+       ============================================================ -->
+  <section class="view" id="view-library">
+
+    <div class="page library-page" style="padding-bottom:110px;">
+      <!-- Header -->
+      <div class="library-header">
+        <h1 class="library-title">城市声音档案</h1>
+        <p class="library-guide">收集这座城市正在发生的声音</p>
+      </div>
+
+      <!-- Category entries -->
+      <div class="library-cats" id="libraryCats">
+        <div class="lib-cat active" data-cat="all">
+          <div class="lc-num" id="catCountAll">6</div>
+          <div class="lc-name">全部</div>
+        </div>
+        <div class="lib-cat nature" data-cat="nature">
+          <div class="lc-num" id="catCountNature">3</div>
+          <div class="lc-name">自然</div>
+        </div>
+        <div class="lib-cat city" data-cat="city">
+          <div class="lc-num" id="catCountCity">2</div>
+          <div class="lc-name">城市生活</div>
+        </div>
+        <div class="lib-cat culture" data-cat="culture">
+          <div class="lc-num" id="catCountCulture">1</div>
+          <div class="lc-name">人文</div>
+        </div>
+      </div>
+
+      <!-- Sort toggle -->
+      <div class="library-sort">
+        <span class="sort-label">排序方式</span>
+        <span class="sort-opt active" data-sort="time" onclick="setLibSort('time')">按录制时间</span>
+        <span class="sort-dot">·</span>
+        <span class="sort-opt" data-sort="location" onclick="setLibSort('location')">按地点</span>
+      </div>
+
+      <!-- Sound list -->
+      <div class="library-list" id="libraryList"></div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       VIEW: 声音详情
+       ============================================================ -->
+  <section class="view" id="view-sound-detail">
+
+    <div class="page" style="padding-bottom:40px;">
+      <div class="detail-cover" id="detailCover">
+        <div class="cover-bg" id="detailCoverBg">
+          <div class="cover-wave"></div>
+          <svg class="cover-sound-icon" width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 12h2M19 12h2M5 12a7 7 0 0114 0M7 12a5 5 0 0110 0M9 12a3 3 0 016 0"/>
+          </svg>
+        </div>
+        <div class="cover-overlay"></div>
+        <button class="detail-back" onclick="goBack()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        </button>
+        <button class="detail-fav" id="detailFav" onclick="toggleFavDetail()">
+          <svg id="favIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+        </button>
+      </div>
+
+      <div class="detail-body">
+        <div class="detail-title" id="detailName">声音名称</div>
+        <div class="detail-meta">
+          <span class="item" id="detailLocation">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            地点
+          </span>
+          <span class="item tag" id="detailCategory"></span>
+          <span class="item" id="detailDuration">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+            时长
+          </span>
+        </div>
+        <div class="detail-meta" style="margin-top:8px;">
+          <span class="item" id="detailTime">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+            录制时间
+          </span>
+          <span class="item" id="detailRecorder">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            记录者
+          </span>
+        </div>
+
+        <div class="detail-desc" id="detailDesc">声音描述</div>
+
+        <!-- Player -->
+        <div class="player">
+          <div class="player-top">
+            <button class="play-btn" id="playBtn" onclick="togglePlay()">
+              <svg id="playIcon" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+            </button>
+            <div class="player-info">
+              <div class="waveform" id="playerWave">
+                <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
+                <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
+                <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
+              </div>
+              <div class="time">
+                <span id="curTime">00:00</span>
+                <span id="totalTime">00:38</span>
+              </div>
+            </div>
+          </div>
+          <div class="progress" style="margin-top:14px;">
+            <div class="bar-fill" id="progressFill"></div>
+          </div>
+        </div>
+
+        <button class="btn btn-outline btn-block" style="margin-top:20px;" onclick="goBack()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          返回地图继续探索
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       VIEW: 声音漫游
+       ============================================================ -->
+  <section class="view" id="view-wander">
+    <div class="page">
+      <div class="wander-header">
+        <div class="wander-title">声音漫游</div>
+        <div class="wander-add" onclick="openAddRoute()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+        </div>
+      </div>
+      <div class="discover-hero" style="padding:0 16px 6px;">
+        <div class="guide-text">选一条主题路线，连续聆听城市的声音</div>
+      </div>
+      <div class="wander-list" id="wanderList"></div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       VIEW: 漫游路线详情
+       ============================================================ -->
+  <section class="view" id="view-route-detail">
+
+    <div class="page">
+      <div style="padding:0 20px 14px;">
+        <button class="detail-back" onclick="goBack()" style="position:static;background:var(--bg-card);box-shadow:var(--shadow-sm);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        </button>
+      </div>
+
+      <div class="route-detail-hero" id="routeHero"></div>
+
+      <div class="route-map" id="routeMap"></div>
+
+      <div class="section-head" style="margin-top:8px;">
+        <h3>路线声音</h3>
+      </div>
+      <div class="route-sounds" id="routeSounds"></div>
+
+      <div style="display:flex;justify-content:center;padding:24px 20px 28px;">
+        <button class="start-roam-btn" onclick="startRoam()">
+          开始漫游
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       VIEW: 记录 — 录音
+       ============================================================ -->
+  <section class="view" id="view-record">
+    <video class="record-bg-video" autoplay muted loop playsinline>
+      <source src="record_bg.mp4" type="video/mp4">
+    </video>
+    <div class="topbar">
+      <div class="title">记录声音</div>
+    </div>
+
+    <div class="page record-page" style="padding-bottom:110px;">
+      <div class="record-stage">
+        <div class="record-tip" id="recTip">点击下方按钮，开始记录身边的声音</div>
+
+        <div class="record-timer" id="recTimer">00:00</div>
+
+        <div class="record-waveform" id="recWave">
+          <!-- 16 bars -->
+        </div>
+
+        <div class="record-btn-ring" id="recRing">
+          <button class="record-btn" id="recBtn" onclick="toggleRecord()">
+            <svg id="recIcon" width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M12 14a3 3 0 003-3V5a3 3 0 00-6 0v6a3 3 0 003 3z"/><path d="M19 11a1 1 0 10-2 0 5 5 0 01-10 0 1 1 0 10-2 0 7 7 0 006 6.92V21H8a1 1 0 100 2h8a1 1 0 100-2h-3v-3.08A7 7 0 0019 11z" fill="currentColor"/></svg>
+          </button>
+        </div>
+
+        <div class="record-actions" id="recActions" style="display:none;">
+          <button class="btn btn-ghost" onclick="resetRecord()">重录</button>
+          <button class="btn btn-accent" onclick="goEdit()">试听并编辑 ›</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       VIEW: 录音编辑与提交
+       ============================================================ -->
+  <section class="view" id="view-edit">
+    <div class="topbar">
+      <button class="icon-btn" onclick="goBack()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      </button>
+      <div class="title">编辑声音</div>
+      <div style="width:40px;"></div>
+    </div>
+
+    <div class="page">
+      <div class="edit-form">
+        <!-- audio preview -->
+        <div class="audio-preview">
+          <button class="mini-play" onclick="this.classList.toggle('playing')">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+          </button>
+          <div class="ap-info">
+            <div class="t" id="editAudioName">录音 · 00:12</div>
+            <div class="d">点击试听，确认内容无误</div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>声音名称</label>
+          <input class="form-input" id="editName" type="text" placeholder="例如：雨落在屋檐上" value="雨落在屋檐上" />
+        </div>
+
+        <div class="form-group">
+          <label>声音分类</label>
+          <div class="category-grid" id="catGrid">
+            <div class="cat-chip" data-cat="nature">🌿 自然</div>
+            <div class="cat-chip selected" data-cat="city">🏙 城市生活</div>
+            <div class="cat-chip" data-cat="culture">🎭 人文</div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>封面图片</label>
+          <div class="cover-upload" id="coverUpload" onclick="document.getElementById('coverFile').click()">
+            <img id="coverPreview" class="cover-preview" style="display:none;" alt="">
+            <div class="cover-upload-placeholder" id="coverPlaceholder">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+              <span>点击添加封面图</span>
+            </div>
+          </div>
+          <input type="file" id="coverFile" accept="image/*" style="display:none;" onchange="handleCoverUpload(event)">
+        </div>
+
+        <div class="form-group">
+          <label>地点信息</label>
+          <div class="location-row">
+            <input class="form-input" id="editLocation" type="text" placeholder="点击右侧按钮获取定位" value="" />
+            <button type="button" class="locate-btn" id="locateBtn" onclick="getUserLocation()">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>记录者</label>
+          <div class="category-grid">
+            <div class="cat-chip selected" data-rec="nick">公开昵称</div>
+            <div class="cat-chip" data-rec="anon">匿名展示</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="privacy-tip">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;margin-top:1px;"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+        <span>录制前请避免收录他人隐私对话或敏感信息，共同维护良好的声音社区。</span>
+      </div>
+
+      <div style="padding:0 20px 20px;">
+        <button class="btn btn-primary btn-block" onclick="submitRecording()">提交声音</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       VIEW: 我的
+       ============================================================ -->
+  <section class="view" id="view-profile">
+    <div class="topbar">
+      <div class="title">我的</div>
+    </div>
+
+    <div class="page">
+      <!-- profile header -->
+      <div class="profile-header">
+        <div class="profile-row">
+          <div class="avatar">榕</div>
+          <div>
+            <div class="profile-name">榕城听客</div>
+            <div class="profile-bio">用耳朵记录这座城的日常</div>
+          </div>
+        </div>
+        <div class="stats-row">
+          <div class="stat"><div class="num">12</div><div class="lbl">已提交声音</div></div>
+          <div class="stat"><div class="num">8</div><div class="lbl">地图收录</div></div>
+          <div class="stat"><div class="num">15</div><div class="lbl">我的收藏</div></div>
+        </div>
+      </div>
+
+      <!-- quick entries -->
+      <div class="profile-actions">
+        <div class="pa-item" onclick="filterProfile('recordings')">
+          <div class="pa-icon" style="background:var(--primary-light);color:var(--primary);">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 14a3 3 0 003-3V5a3 3 0 00-6 0v6a3 3 0 003 3z"/><path d="M19 11a7 7 0 01-14 0"/></svg>
+          </div>
+          <div class="pa-label">我的录音</div>
+        </div>
+        <div class="pa-item" onclick="filterProfile('drafts')">
+          <div class="pa-icon" style="background:var(--accent-light);color:var(--accent-dark);">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>
+          </div>
+          <div class="pa-label">录音草稿<span class="pa-badge">1</span></div>
+        </div>
+        <div class="pa-item" onclick="filterProfile('favorites')">
+          <div class="pa-icon" style="background:var(--leaf-green-light);color:#4A7A54;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+          </div>
+          <div class="pa-label">我的收藏</div>
+        </div>
+      </div>
+
+      <div class="section-head">
+        <h3 id="profileListTitle">我的录音</h3>
+      </div>
+      <div class="nearby-list" id="profileList"></div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       Add Route Modal
+       ============================================================ -->
+  <div class="modal-mask" id="addRouteModal" onclick="if(event.target===this)closeAddRoute()">
+    <div class="modal-card">
+      <div class="modal-title">新建漫游路线</div>
+      <div class="form-group">
+        <label>路线名称</label>
+        <input class="form-input" id="newRouteName" type="text" placeholder="例如：福州的清晨" />
+      </div>
+      <div class="form-group">
+        <label>路线描述</label>
+        <textarea class="form-input" id="newRouteDesc" rows="2" placeholder="简单描述这条路线的声音特色" style="resize:none;"></textarea>
+      </div>
+      <div class="form-group">
+        <label>时长（分钟）</label>
+        <input class="form-input" id="newRouteDur" type="text" placeholder="约 10 分钟" />
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" onclick="closeAddRoute()">取消</button>
+        <button class="btn btn-primary" onclick="confirmAddRoute()">创建路线</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       Submit Success Overlay
+       ============================================================ -->
+  <div class="submit-success" id="successOverlay">
+    <div class="success-card">
+      <div class="success-icon">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+      </div>
+      <h3>提交成功</h3>
+      <p>你的声音已进入城市声音档案，<br/>正在等待审核收录。</p>
+      <button class="btn btn-primary btn-block" style="margin-top:18px;" onclick="closeSuccess()">好的，去我的看看</button>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       Bottom Navigation (shared across all views)
+       ============================================================ -->
+  <nav class="bottom-nav" id="bottomNav">
+    <button class="nav-item active" data-nav="discover" onclick="switchNav('discover', this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/></svg>
+      <span class="nav-label">发现</span>
+    </button>
+    <button class="nav-item" data-nav="library" onclick="switchNav('library', this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
+      <span class="nav-label">声音库</span>
+    </button>
+    <button class="nav-record" onclick="startRecordFromNav()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 14a3 3 0 003-3V5a3 3 0 00-6 0v6a3 3 0 003 3z"/><path d="M19 11a1 1 0 10-2 0 5 5 0 01-10 0 1 1 0 10-2 0 7 7 0 006 6.92V21H8a1 1 0 100 2h8a1 1 0 100-2h-3v-3.08A7 7 0 0019 11z"/></svg>
+    </button>
+    <button class="nav-item" data-nav="wander" onclick="switchNav('wander', this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/></svg>
+      <span class="nav-label">漫游</span>
+    </button>
+    <button class="nav-item" data-nav="profile" onclick="switchNav('profile', this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span class="nav-label">我的</span>
+    </button>
+  </nav>
+
+</div>
+
+<script src="mock.js"></script>
+<script src="fuzhou-map.js"></script>
+<script src="fuzhou-osm.js"></script>
+<script>
+/* ============================================================
+   App Logic — Routing, Rendering, Interactions
+   ============================================================ */
+
+// --- State ---
+const state = {
+  currentView: 'discover',
+  viewStack: [],          // for back navigation
+  activeCategory: 'all',
+  activeSoundId: null,
+  activeRouteId: null,
+  isPlaying: false,
+  playTimer: null,
+  curPlaySec: 0,
+  audioEl: null,
+  isRecording: false,
+  recTimer: null,
+  recSec: 0,
+  editCategory: 'city',
+  profileFilter: 'recordings',
+  libraryCat: 'all',
+  librarySort: 'time'
+};
+
+// --- Navigation ---
+const NAV_VIEWS = { discover: 'view-discover', library: 'view-library', wander: 'view-wander', record: 'view-record', profile: 'view-profile' };
+const NAV_MAP = { discover: 'discover', library: 'library', wander: 'wander', record: null, profile: 'profile' };
+
+function startRecordFromNav() {
+  switchNav('record', null);
+  // small delay so the view is visible before starting recording
+  setTimeout(() => { if (!state.isRecording) toggleRecord(); }, 50);
+}
+
+function switchNav(navKey, el) {
+  if (!NAV_VIEWS[state.currentView]) {
+    state.viewStack = [];
+  }
+  goView(navKey, true);
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  if (el) el.classList.add('active');
+  const target = NAV_MAP[navKey];
+  if (target) {
+    const navItem = document.querySelector('.nav-item[data-nav="' + target + '"]');
+    if (navItem) navItem.classList.add('active');
+  } else {
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  }
+  if (navKey === 'library') renderLibrary();
+}
+
+function goView(viewKey, resetStack) {
+  if (resetStack) state.viewStack = [];
+  else if (NAV_VIEWS[state.currentView] || viewKey === state.currentView) {
+    // don't stack main views onto each other
+  }
+  // hide all views
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  const target = document.getElementById('view-' + viewKey);
+  if (target) target.classList.add('active');
+  state.currentView = viewKey;
+  // scroll to top
+  const page = target.querySelector('.page');
+  if (page) page.scrollTop = 0;
+}
+
+function goBack() {
+  if (state.viewStack.length > 0) {
+    const prev = state.viewStack.pop();
+    goView(prev, false);
+    // restore nav active
+    restoreNavActive();
+  } else {
+    goView('discover', true);
+    restoreNavActive();
+  }
+}
+
+function restoreNavActive() {
+  const target = NAV_MAP[state.currentView];
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  if (target) {
+    const navItem = document.querySelector('.nav-item[data-nav="' + target + '"]');
+    if (navItem) navItem.classList.add('active');
+  }
+}
+
+function openSoundDetail(sid) {
+  state.viewStack.push(state.currentView);
+  state.activeSoundId = sid;
+  renderSoundDetail(sid);
+  goView('sound-detail', false);
+  stopPlayback();
+}
+
+function openRouteDetail(rid) {
+  state.viewStack.push(state.currentView);
+  state.activeRouteId = rid;
+  renderRouteDetail(rid);
+  goView('route-detail', false);
+}
+
+// --- Helpers ---
+function fmtTime(sec) {
+  const m = Math.floor(sec / 60).toString().padStart(2, '0');
+  const s = Math.floor(sec % 60).toString().padStart(2, '0');
+  return m + ':' + s;
+}
+
+function catTag(cat) {
+  const c = CATEGORIES[cat];
+  if (!c) return '';
+  return '<span class="tag ' + c.cls + '">' + c.label + '</span>';
+}
+
+function statusChip(st) {
+  const map = {
+    published: { cls: 'status-published', label: '已收录' },
+    reviewing: { cls: 'status-reviewing', label: '审核中' },
+    draft:    { cls: 'status-draft',     label: '草稿' }
+  };
+  const m = map[st] || map.draft;
+  return '<span class="status-chip ' + m.cls + '">' + m.label + '</span>';
+}
+
+// --- Render: nearby sounds list ---
+function renderNearby() {
+  const list = document.getElementById('nearbyList');
+  let sounds = state.activeCategory === 'all'
+    ? SOUNDS
+    : SOUNDS.filter(s => s.category === state.activeCategory);
+  list.innerHTML = sounds.map(s => `
+    <div class="sound-card" onclick="openSoundDetail('${s.id}')">
+      <div class="thumb" style="background-image:url('${s.cover}');">
+        <div class="play-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+        </div>
+      </div>
+      <div class="info">
+        <div class="name">${s.name}</div>
+        <div class="meta">
+          <span>${s.location}</span>
+          <span>·</span>
+          ${catTag(s.category)}
+          <span>·</span>
+          <span>${s.duration}s</span>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// --- Category filter ---
+document.getElementById('filterBar').addEventListener('click', function(e) {
+  const tag = e.target.closest('.tag');
+  if (!tag) return;
+  document.querySelectorAll('#filterBar .tag').forEach(t => t.classList.remove('active'));
+  tag.classList.add('active');
+  state.activeCategory = tag.dataset.cat;
+  renderNearby();
+  renderMapPoints();
+});
+
+// --- Render real Fuzhou map (OSM layers + boundary + districts + sound points) ---
+let mapInfo = null;
+
+// --- Map zoom & viewport state (single consistent zoom model) ---
+let mapZoom = 3.5;
+let mapCenter = { lng: 119.30, lat: 26.08 };
+// Base viewport at zoom=1: covers central Fuzhou (all sound points + surroundings)
+const BASE_VIEWPORT = { minLng: 119.17, minLat: 26.00, maxLng: 119.42, maxLat: 26.16 };
+const MIN_ZOOM = 0.5;
+const MAX_ZOOM = 5.0;
+
+function getViewport() {
+  const cx = mapCenter.lng, cy = mapCenter.lat;
+  const halfLng = (BASE_VIEWPORT.maxLng - BASE_VIEWPORT.minLng) / 2 / mapZoom;
+  const halfLat = (BASE_VIEWPORT.maxLat - BASE_VIEWPORT.minLat) / 2 / mapZoom;
+  return { minLng: cx - halfLng, minLat: cy - halfLat, maxLng: cx + halfLng, maxLat: cy + halfLat };
+}
+
+// Road style by fclass — muted, low-saturation warm grays so roads don't dominate
+// Road style — gray-green thin lines on light sage base
+const ROAD_STYLES = {
+  motorway:       { width: 2.6, color: '#9DB0A5' },
+  motorway_link:  { width: 1.8, color: '#9DB0A5' },
+  trunk:          { width: 2.2, color: '#A8B8AE' },
+  trunk_link:     { width: 1.6, color: '#A8B8AE' },
+  primary:        { width: 1.9, color: '#B5C2B9' },
+  primary_link:   { width: 1.3, color: '#B5C2B9' },
+  secondary:      { width: 1.5, color: '#C2CDC5' },
+  secondary_link: { width: 1.2, color: '#C2CDC5' },
+  tertiary:       { width: 1.1, color: '#CFD8D1' },
+  residential:    { width: 0.8, color: '#DCE3DD' }
+};
+
+// LOD: which road fclasses are visible at a given zoom level
+function visibleRoadClasses(zoom) {
+  const cls = [];
+  if (zoom >= 1.0) cls.push('motorway', 'motorway_link');
+  if (zoom >= 1.3) cls.push('trunk', 'trunk_link');
+  if (zoom >= 1.6) cls.push('primary', 'primary_link');
+  if (zoom >= 2.0) cls.push('secondary', 'secondary_link');
+  if (zoom >= 2.5) cls.push('tertiary');
+  if (zoom >= 3.0) cls.push('residential');
+  return cls;
+}
+
+// Single zoom-driven scale factor for road widths & label sizes
+function zoomScale(zoom) {
+  return Math.max(0.45, Math.min(2.2, zoom));
+}
+
+function renderOSMLayers(svg, proj, zoom) {
+  const osm = window.FUZHOU_OSM;
+  if (!osm || !osm.layers) return;
+  const SVG_NS = 'http://www.w3.org/2000/svg';
+  const zs = zoomScale(zoom);
+  const addPath = (d, attrs) => {
+    if (!d) return;
+    const p = document.createElementNS(SVG_NS, 'path');
+    p.setAttribute('d', d);
+    for (const k in attrs) p.setAttribute(k, attrs[k]);
+    svg.appendChild(p);
+  };
+  const geoToPath = (geom) => coordsToPath(geom.coordinates, proj, geom.type);
+  const combinePaths = (features) => features.map(f => geoToPath(f.geometry)).filter(Boolean).join(' ');
+
+  // 1. Water areas (always visible)
+  addPath(combinePaths(osm.layers.waters), { fill: 'rgba(180,205,210,0.55)', stroke: 'rgba(140,175,182,0.35)', 'stroke-width': (0.5 * zs).toFixed(2) });
+
+  // 2. Green areas (always visible)
+  addPath(combinePaths(osm.layers.greens), { fill: 'rgba(150,180,155,0.32)', stroke: 'none' });
+
+  // 3. Waterways: rivers always; streams/canals only at higher zoom
+  const rivers = osm.layers.waterways.filter(f => f.properties.fclass === 'river');
+  const otherWW = osm.layers.waterways.filter(f => f.properties.fclass !== 'river');
+  if (zoom >= 1.6) {
+    addPath(combinePaths(otherWW), { fill: 'none', stroke: 'rgba(140,175,182,0.6)', 'stroke-width': (1.0 * zs).toFixed(2), 'stroke-linecap': 'round' });
+  }
+  addPath(combinePaths(rivers), { fill: 'none', stroke: 'rgba(140,175,182,0.85)', 'stroke-width': (2.0 * zs).toFixed(2), 'stroke-linecap': 'round' });
+
+  // 4. Roads: LOD by fclass, drawn low→high class; width scales with zoom
+  const visClasses = visibleRoadClasses(zoom);
+  const order = ['residential', 'tertiary', 'secondary', 'secondary_link', 'primary', 'primary_link', 'trunk', 'trunk_link', 'motorway_link', 'motorway'];
+  const byClass = {};
+  osm.layers.roads.forEach(f => { (byClass[f.properties.fclass] = byClass[f.properties.fclass] || []).push(f); });
+  order.forEach(cls => {
+    if (visClasses.indexOf(cls) === -1) return;
+    if (!byClass[cls] || !byClass[cls].length) return;
+    const style = ROAD_STYLES[cls] || { width: 1, color: '#EDE0CC' };
+    addPath(combinePaths(byClass[cls]), { fill: 'none', stroke: style.color, 'stroke-width': (style.width * zs).toFixed(2), 'stroke-linecap': 'round', 'stroke-linejoin': 'round' });
+  });
+
+  // 5. Labels for named features (LOD by zoom)
+  renderLabels(svg, proj, zoom, osm, zs);
+}
+
+// --- Geometry helpers for label placement ---
+function midpointOfLine(coords) {
+  // coords: array of [lng,lat]; return middle point
+  if (!coords || !coords.length) return null;
+  const mid = Math.floor(coords.length / 2);
+  return coords[mid];
+}
+function centroidOfPolygon(coords) {
+  // coords: Polygon = array of rings; average all vertices of outer ring
+  if (!coords || !coords.length) return null;
+  const ring = coords[0];
+  let sx = 0, sy = 0, n = 0;
+  for (let i = 0; i < ring.length; i++) { sx += ring[i][0]; sy += ring[i][1]; n++; }
+  return n ? [sx / n, sy / n] : null;
+}
+function labelAnchor(geom) {
+  if (geom.type === 'Point') return geom.coordinates;
+  if (geom.type === 'LineString') return midpointOfLine(geom.coordinates);
+  if (geom.type === 'MultiLineString') return midpointOfLine(geom.coordinates[0]);
+  if (geom.type === 'Polygon') return centroidOfPolygon(geom.coordinates);
+  if (geom.type === 'MultiPolygon') return centroidOfPolygon(geom.coordinates[0]);
+  return null;
+}
+
+// Curated key place names — only show place names related to sound points,
+// not all street names. Coordinates are real (WGS84).
+const KEY_PLACE_LABELS = [
+  { name: '西湖公园',   lng: 119.285, lat: 26.102, color: '#2F5D54' },
+  { name: '三坊七巷',   lng: 119.295, lat: 26.083, color: '#94704F' },
+  { name: '闽江',       lng: 119.315, lat: 26.048, color: '#5A8A92' },
+  { name: '乌山',       lng: 119.290, lat: 26.078, color: '#2F5D54' }
+];
+
+function renderLabels(svg, proj, zoom, osm, zs) {
+  const SVG_NS = 'http://www.w3.org/2000/svg';
+  const vw = svg.clientWidth || 320;
+  const vh = svg.clientHeight || 360;
+  // Sub-linear text scale for readability
+  const textScale = Math.pow(zs, 0.6);
+  const inView = (x, y) => x >= -10 && x <= vw + 10 && y >= -10 && y <= vh + 10;
+  const placed = [];
+  const collides = (x, y, w, h) => {
+    for (let i = 0; i < placed.length; i++) {
+      const b = placed[i];
+      if (x < b.x + b.w && x + w > b.x && y < b.y + b.h && y + h > b.y) return true;
+    }
+    return false;
+  };
+
+  KEY_PLACE_LABELS.forEach(pl => {
+    const p = proj(pl.lng, pl.lat);
+    if (!inView(p.x, p.y)) return;
+    const fs = 10 * textScale;
+    const estW = pl.name.length * fs * 1.05 + 4;
+    const estH = fs + 2;
+    const bx = p.x - estW / 2;
+    const by = p.y - estH / 2;
+    if (collides(bx, by, estW, estH)) return;
+    placed.push({ x: bx, y: by, w: estW, h: estH });
+    const t = document.createElementNS(SVG_NS, 'text');
+    t.setAttribute('x', p.x.toFixed(1));
+    t.setAttribute('y', p.y.toFixed(1));
+    t.setAttribute('text-anchor', 'middle');
+    t.setAttribute('font-size', fs.toFixed(1));
+    t.setAttribute('font-family', 'system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif');
+    t.setAttribute('font-weight', '600');
+    t.setAttribute('fill', pl.color);
+    t.setAttribute('pointer-events', 'none');
+    t.textContent = pl.name;
+    svg.appendChild(t);
+  });
+}
+
+function renderRealMap() {
+  const wrap = document.getElementById('mapWrap');
+  if (!wrap) return;
+  const w = wrap.clientWidth;
+  const h = wrap.clientHeight;
+  if (w === 0 || h === 0) return;
+  // Clear previous SVG and points (keep legend + zoom controls)
+  wrap.querySelectorAll('svg, .map-point').forEach(el => el.remove());
+  // Compute viewport from center + zoom, render boundary + districts
+  const viewport = getViewport();
+  mapInfo = renderFuzhouMap(wrap, { showDistricts: mapZoom < 1.5, bounds: viewport });
+  // Render OSM layers with LOD based on zoom
+  if (mapInfo && mapInfo.svg) {
+    renderOSMLayers(mapInfo.svg, mapInfo.proj, mapZoom);
+  }
+  // Render sound points
+  renderMapPoints();
+  // Update zoom controls state
+  updateZoomUI();
+}
+
+// --- Zoom controls ---
+function zoomIn() {
+  if (mapZoom >= MAX_ZOOM) return;
+  mapZoom = Math.min(MAX_ZOOM, +(mapZoom * 1.4).toFixed(2));
+  renderRealMap();
+}
+function zoomOut() {
+  if (mapZoom <= MIN_ZOOM) return;
+  mapZoom = Math.max(MIN_ZOOM, +(mapZoom / 1.4).toFixed(2));
+  renderRealMap();
+}
+function updateZoomUI() {
+  const zin = document.getElementById('zoomInBtn');
+  const zout = document.getElementById('zoomOutBtn');
+  if (zin) zin.style.opacity = mapZoom >= MAX_ZOOM ? '0.35' : '1';
+  if (zout) zout.style.opacity = mapZoom <= MIN_ZOOM ? '0.35' : '1';
+}
+
+function renderMapPoints() {
+  if (!mapInfo) return;
+  const wrap = document.getElementById('mapWrap');
+  // Remove old points
+  wrap.querySelectorAll('.map-point').forEach(el => el.remove());
+  // Filter by category
+  let sounds = state.activeCategory === 'all'
+    ? SOUNDS
+    : SOUNDS.filter(s => s.category === state.activeCategory);
+  renderSoundPoints(wrap, mapInfo, sounds, function(sid) {
+    openSoundDetail(sid);
+  });
+}
+
+// --- Render: sound detail ---
+function renderSoundDetail(sid) {
+  const s = SOUNDS.find(x => x.id === sid);
+  if (!s) return;
+  document.getElementById('detailName').textContent = s.name;
+  document.getElementById('detailLocation').innerHTML =
+    '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> ' + s.location;
+  document.getElementById('detailCategory').innerHTML = catTag(s.category);
+  document.getElementById('detailDuration').innerHTML =
+    '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> ' + s.duration + ' 秒';
+  document.getElementById('detailTime').innerHTML =
+    '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg> ' + s.recordTime;
+  document.getElementById('detailRecorder').innerHTML =
+    '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> ' + s.recorder;
+  document.getElementById('detailDesc').textContent = s.desc;
+  document.getElementById('totalTime').textContent = fmtTime(s.duration);
+  document.getElementById('curTime').textContent = '00:00';
+  document.getElementById('progressFill').style.width = '0%';
+
+  // cover
+  const coverBg = document.getElementById('detailCoverBg');
+  coverBg.className = 'cover-bg';
+  coverBg.style.backgroundImage = s.cover ? `url('${s.cover}')` : '';
+
+  // reset audio element
+  if (state.audioEl) {
+    state.audioEl.pause();
+    state.audioEl.src = '';
+  }
+  state.curPlaySec = 0;
+  if (s.audio) {
+    const a = new Audio(s.audio);
+    a.preload = 'metadata';
+    a.addEventListener('loadedmetadata', () => {
+      if (a.duration && isFinite(a.duration)) {
+        s.duration = Math.round(a.duration);
+        document.getElementById('totalTime').textContent = fmtTime(s.duration);
+      }
+    });
+    a.addEventListener('timeupdate', () => {
+      state.curPlaySec = a.currentTime;
+      document.getElementById('curTime').textContent = fmtTime(a.currentTime);
+      const pct = (a.currentTime / s.duration * 100);
+      document.getElementById('progressFill').style.width = Math.min(pct, 100) + '%';
+    });
+    a.addEventListener('ended', () => {
+      stopPlayback();
+      state.curPlaySec = 0;
+      document.getElementById('curTime').textContent = '00:00';
+      document.getElementById('progressFill').style.width = '0%';
+    });
+    state.audioEl = a;
+  }
+
+  // favorite state
+  updateFavIcon();
+}
+
+function updateFavIcon() {
+  const fav = FAVORITES.indexOf(state.activeSoundId) >= 0;
+  const icon = document.getElementById('favIcon');
+  if (fav) {
+    icon.setAttribute('fill', 'currentColor');
+  } else {
+    icon.setAttribute('fill', 'none');
+  }
+}
+
+function toggleFavDetail() {
+  const fav = FAVORITES.indexOf(state.activeSoundId) >= 0;
+  if (fav) {
+    const i = FAVORITES.indexOf(state.activeSoundId);
+    FAVORITES.splice(i, 1);
+  } else {
+    FAVORITES.push(state.activeSoundId);
+  }
+  updateFavIcon();
+}
+
+// --- Player ---
+function togglePlay() {
+  const s = SOUNDS.find(x => x.id === state.activeSoundId);
+  if (!s) return;
+  const btn = document.getElementById('playBtn');
+  const icon = document.getElementById('playIcon');
+  const wave = document.getElementById('playerWave');
+
+  if (state.isPlaying) {
+    stopPlayback();
+  } else {
+    state.isPlaying = true;
+    btn.classList.add('playing');
+    icon.innerHTML = '<path d="M6 5h4v14H6zM14 5h4v14h-4z"/>';
+    wave.classList.add('playing');
+
+    if (state.audioEl) {
+      // real audio playback
+      state.audioEl.play().catch(() => {
+        // autoplay may be blocked; user gesture should have allowed it
+      });
+    } else {
+      // simulated timer fallback
+      state.playTimer = setInterval(() => {
+        state.curPlaySec++;
+        if (state.curPlaySec >= s.duration) {
+          stopPlayback();
+          state.curPlaySec = 0;
+          return;
+        }
+        document.getElementById('curTime').textContent = fmtTime(state.curPlaySec);
+        document.getElementById('progressFill').style.width = (state.curPlaySec / s.duration * 100) + '%';
+      }, 1000);
+    }
+  }
+}
+
+function stopPlayback() {
+  state.isPlaying = false;
+  const btn = document.getElementById('playBtn');
+  const icon = document.getElementById('playIcon');
+  const wave = document.getElementById('playerWave');
+  if (btn) btn.classList.remove('playing');
+  if (icon) icon.innerHTML = '<path d="M8 5v14l11-7z"/>';
+  if (wave) wave.classList.remove('playing');
+  if (state.playTimer) { clearInterval(state.playTimer); state.playTimer = null; }
+  if (state.audioEl) { state.audioEl.pause(); }
+}
+
+// --- Render: wander list ---
+function renderWander() {
+  const list = document.getElementById('wanderList');
+  list.innerHTML = ROUTES.map(r => {
+    const stops = r.sounds.map((sid, i) => {
+      const s = SOUNDS.find(x => x.id === sid);
+      const short = s ? s.location.slice(0, 4) : '';
+      const cls = i === 0 ? 'start' : (i === r.sounds.length - 1 ? 'end' : '');
+      return `<div class="rc-stop ${cls}"><div class="dot"></div><span class="stop-label">${short}</span></div>`;
+    }).join('');
+    return `
+      <div class="route-card" onclick="openRouteDetail('${r.id}')">
+        <div class="route-cover" style="background-image:url('${r.cover}');">
+          <div class="cover-wave"></div>
+        </div>
+        <div class="rc-body">
+          <div class="rc-top">
+            <div class="rc-name">${r.name}</div>
+            <div class="rc-duration">${r.duration.toUpperCase()}</div>
+          </div>
+          <div class="rc-meta">${r.soundCount} 个声音 · ${r.desc}</div>
+          <div class="rc-timeline">${stops}</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// --- Render: route detail ---
+function renderRouteDetail(rid) {
+  const r = ROUTES.find(x => x.id === rid);
+  if (!r) return;
+  const hero = document.getElementById('routeHero');
+  hero.innerHTML = `
+    <div class="rd-cover" style="background-image:url('${r.cover}');">
+      <div class="cover-wave"></div>
+    </div>
+    <div class="rd-info">
+      <h2>${r.name}</h2>
+      <p>${r.desc}</p>
+    </div>
+  `;
+
+  // route map with nodes
+  const map = document.getElementById('routeMap');
+  const nodePositions = [
+    { top: '78%', left: '18%' },
+    { top: '50%', left: '38%' },
+    { top: '28%', left: '58%' },
+    { top: '22%', left: '82%' }
+  ];
+  const nodes = r.sounds.slice(0, 4).map((sid, i) => {
+    const pos = nodePositions[i] || nodePositions[3];
+    const cls = i === 0 ? 'start' : (i === r.sounds.length - 1 ? 'end' : '');
+    return `<div class="route-node ${cls}" style="top:${pos.top};left:${pos.left};"></div>`;
+  }).join('');
+  // dashed path svg
+  map.innerHTML = `
+    <svg width="100%" height="100%" style="position:absolute;inset:0;">
+      <path class="route-path" d="M 18% 78% Q 28% 60%, 38% 50% T 58% 28% T 82% 22%" />
+    </svg>
+    ${nodes}
+  `;
+
+  // sound list
+  const sl = document.getElementById('routeSounds');
+  sl.innerHTML = r.sounds.map((sid, i) => {
+    const s = SOUNDS.find(x => x.id === sid);
+    if (!s) return '';
+    return `
+      <div class="route-sound-item" onclick="openSoundDetail('${s.id}')">
+        <div class="num">${i + 1}</div>
+        <div class="rsi-info">
+          <div class="n">${s.name}</div>
+          <div class="m">${s.location} · ${s.duration}s</div>
+        </div>
+        ${catTag(s.category)}
+      </div>
+    `;
+  }).join('');
+}
+
+function startRoam() {
+  const r = ROUTES.find(x => x.id === state.activeRouteId);
+  if (r && r.sounds.length > 0) {
+    openSoundDetail(r.sounds[0]);
+  }
+}
+
+// --- Recording waveform (animated voiceprint bars) ---
+function buildRecWave() {
+  const w = document.getElementById('recWave');
+  const bars = 28;
+  let html = '';
+  for (let i = 0; i < bars; i++) {
+    html += `<div class="rec-bar" style="--i:${i}"></div>`;
+  }
+  w.innerHTML = html;
+}
+
+function toggleRecord() {
+  if (!state.isRecording) {
+    // start
+    state.isRecording = true;
+    state.recSec = 0;
+    document.getElementById('app').classList.add('recording-fullscreen');
+    // ensure background video keeps playing through the layout change
+    const bgVideo = document.querySelector('.record-bg-video');
+    if (bgVideo) { bgVideo.muted = true; bgVideo.play().catch(() => {}); }
+    document.getElementById('recRing').classList.add('recording');
+    document.getElementById('recBtn').classList.add('recording');
+    document.getElementById('recWave').classList.add('recording');
+    document.getElementById('recTip').textContent = '正在聆听… 再次点击结束录音';
+    document.getElementById('recActions').style.display = 'none';
+    state.recTimer = setInterval(() => {
+      state.recSec++;
+      document.getElementById('recTimer').textContent = fmtTime(state.recSec);
+    }, 1000);
+  } else {
+    // stop
+    state.isRecording = false;
+    if (state.recTimer) { clearInterval(state.recTimer); state.recTimer = null; }
+    document.getElementById('app').classList.remove('recording-fullscreen');
+    document.getElementById('recRing').classList.remove('recording');
+    document.getElementById('recBtn').classList.remove('recording');
+    document.getElementById('recWave').classList.remove('recording');
+    document.getElementById('recTip').textContent = '录音完成，可试听或重新录制';
+    document.getElementById('recActions').style.display = 'flex';
+  }
+}
+
+function resetRecord() {
+  state.recSec = 0;
+  document.getElementById('app').classList.remove('recording-fullscreen');
+  document.getElementById('recTimer').textContent = '00:00';
+  document.getElementById('recActions').style.display = 'none';
+  document.getElementById('recTip').textContent = '点击下方按钮，开始记录身边的声音';
+  buildRecWave();
+}
+
+function goEdit() {
+  state.viewStack.push('record');
+  document.getElementById('editAudioName').textContent = '录音 · ' + fmtTime(state.recSec || 12);
+  goView('edit', false);
+}
+
+// --- Edit form category ---
+document.getElementById('catGrid').addEventListener('click', function(e) {
+  const chip = e.target.closest('.cat-chip');
+  if (!chip) return;
+  document.querySelectorAll('#catGrid .cat-chip').forEach(c => c.classList.remove('selected'));
+  chip.classList.add('selected');
+  state.editCategory = chip.dataset.cat;
+});
+
+// recorder selector (second category-grid in edit)
+document.querySelectorAll('#view-edit .category-grid')[1].addEventListener('click', function(e) {
+  const chip = e.target.closest('.cat-chip');
+  if (!chip) return;
+  this.querySelectorAll('.cat-chip').forEach(c => c.classList.remove('selected'));
+  chip.classList.add('selected');
+});
+
+// --- Submit recording ---
+function submitRecording() {
+  const name = document.getElementById('editName').value.trim() || '未命名声音';
+  const location = document.getElementById('editLocation').value.trim() || '未知地点';
+  api.submitRecording({ name, location, category: state.editCategory });
+  document.getElementById('successOverlay').classList.add('show');
+}
+
+function closeSuccess() {
+  document.getElementById('successOverlay').classList.remove('show');
+  state.viewStack = [];
+  switchNav('profile', document.querySelector('.nav-item[data-nav="profile"]'));
+  renderProfile();
+}
+
+// --- View all sounds (discover "查看全部") ---
+function viewAllSounds() {
+  switchNav('library', document.querySelector('.nav-item[data-nav="library"]'));
+}
+
+// --- Add route modal ---
+function openAddRoute() {
+  document.getElementById('newRouteName').value = '';
+  document.getElementById('newRouteDesc').value = '';
+  document.getElementById('newRouteDur').value = '';
+  document.getElementById('addRouteModal').classList.add('show');
+}
+function closeAddRoute() {
+  document.getElementById('addRouteModal').classList.remove('show');
+}
+function confirmAddRoute() {
+  const name = document.getElementById('newRouteName').value.trim();
+  const desc = document.getElementById('newRouteDesc').value.trim();
+  const dur = document.getElementById('newRouteDur').value.trim() || '约 10 分钟';
+  if (!name) { alert('请填写路线名称'); return; }
+  const id = 'r' + Date.now();
+  ROUTES.unshift({
+    id,
+    name,
+    desc: desc || '一条属于你的城市声音漫游路线。',
+    cover: 'images/鼓山.jpg',
+    soundCount: 0,
+    duration: dur,
+    sounds: []
+  });
+  closeAddRoute();
+  renderWander();
+}
+
+// --- Cover image upload ---
+function handleCoverUpload(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    const preview = document.getElementById('coverPreview');
+    preview.src = ev.target.result;
+    preview.style.display = 'block';
+    document.getElementById('coverPlaceholder').style.display = 'none';
+  };
+  reader.readAsDataURL(file);
+}
+
+// --- Geolocation ---
+function getUserLocation() {
+  const input = document.getElementById('editLocation');
+  const btn = document.getElementById('locateBtn');
+  input.value = '正在定位…';
+  input.disabled = true;
+  btn.classList.add('loading');
+
+  const fuzhouSpots = [
+    '福州·三坊七巷', '福州·西湖公园', '福州·闽江沿岸',
+    '福州·乌山', '福州·鼓山', '福州·中洲岛',
+    '福州·镇海楼', '福州·先锋市场'
+  ];
+
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      function(pos) {
+        // In a real app we'd reverse-geocode here; for the prototype
+        // we pick a Fuzhou landmark based on the returned coordinates.
+        const spot = fuzhouSpots[Math.floor(Math.random() * fuzhouSpots.length)];
+        input.value = spot + '（' + pos.coords.latitude.toFixed(4) + ', ' + pos.coords.longitude.toFixed(4) + '）';
+        input.disabled = false;
+        btn.classList.remove('loading');
+      },
+      function() {
+        // permission denied / unavailable — fall back to a Fuzhou default
+        input.value = '福州·当前位置';
+        input.disabled = false;
+        btn.classList.remove('loading');
+      },
+      { timeout: 5000 }
+    );
+  } else {
+    input.value = '福州·当前位置';
+    input.disabled = false;
+    btn.classList.remove('loading');
+  }
+}
+
+// --- Profile ---
+function renderProfile() {
+  const list = document.getElementById('profileList');
+  const title = document.getElementById('profileListTitle');
+  let items = [];
+  if (state.profileFilter === 'recordings') {
+    title.textContent = '我的录音';
+    items = MY_RECORDINGS.map(r => {
+      const c = CATEGORIES[r.category];
+      const matched = SOUNDS.find(s => s.name === r.name);
+      const cover = matched ? matched.cover : 'images/鼓山.jpg';
+      const click = (r.status === 'published' && matched) ? `openSoundDetail('${matched.id}')` : '';
+      return `
+        <div class="sound-card" onclick="${click}">
+          <div class="thumb" style="background-image:url('${cover}');"></div>
+          <div class="info">
+            <div class="name">${r.name}</div>
+            <div class="meta">
+              <span>${r.location}</span>
+              <span>·</span>
+              ${catTag(r.category)}
+            </div>
+            <div style="margin-top:6px;">${statusChip(r.status)}</div>
+          </div>
+        </div>
+      `;
+    });
+  } else if (state.profileFilter === 'drafts') {
+    title.textContent = '录音草稿';
+    const drafts = MY_RECORDINGS.filter(r => r.status === 'draft');
+    items = drafts.length ? drafts.map(r => {
+      const matched = SOUNDS.find(s => s.name === r.name);
+      const cover = matched ? matched.cover : 'images/鼓山.jpg';
+      return `
+      <div class="sound-card">
+        <div class="thumb" style="background-image:url('${cover}');"></div>
+        <div class="info">
+          <div class="name">${r.name}</div>
+          <div class="meta"><span>${r.location}</span></div>
+          <div style="margin-top:6px;">${statusChip('draft')}</div>
+        </div>
+      </div>
+    `;
+    }) : ['<div class="divider-text">暂无草稿</div>'];
+  } else if (state.profileFilter === 'favorites') {
+    title.textContent = '我的收藏';
+    const favs = SOUNDS.filter(s => FAVORITES.indexOf(s.id) >= 0);
+    items = favs.length ? favs.map(s => `
+      <div class="sound-card" onclick="openSoundDetail('${s.id}')">
+        <div class="thumb" style="background-image:url('${s.cover}');"></div>
+        <div class="info">
+          <div class="name">${s.name}</div>
+          <div class="meta"><span>${s.location}</span><span>·</span>${catTag(s.category)}</div>
+        </div>
+      </div>
+    `) : ['<div class="divider-text">还没有收藏声音</div>'];
+  }
+  list.innerHTML = items.join('');
+}
+
+function filterProfile(type) {
+  state.profileFilter = type;
+  renderProfile();
+}
+
+// --- Sound Library ---
+function renderLibrary() {
+  // category counts
+  const counts = { all: SOUNDS.length, nature: 0, city: 0, culture: 0 };
+  SOUNDS.forEach(s => { counts[s.category] = (counts[s.category] || 0) + 1; });
+  const allEl = document.getElementById('catCountAll');
+  if (allEl) allEl.textContent = counts.all;
+  document.getElementById('catCountNature').textContent = counts.nature || 0;
+  document.getElementById('catCountCity').textContent = counts.city || 0;
+  document.getElementById('catCountCulture').textContent = counts.culture || 0;
+
+  // active category styling
+  document.querySelectorAll('#libraryCats .lib-cat').forEach(c => {
+    c.classList.toggle('active', c.dataset.cat === state.libraryCat);
+  });
+
+  // filter + sort
+  let items = state.libraryCat === 'all'
+    ? SOUNDS.slice()
+    : SOUNDS.filter(s => s.category === state.libraryCat);
+  if (state.librarySort === 'time') {
+    items.sort((a, b) => (a.recordTime < b.recordTime ? 1 : -1));
+  } else {
+    items.sort((a, b) => a.location.localeCompare(b.location, 'zh'));
+  }
+
+  const list = document.getElementById('libraryList');
+  list.innerHTML = items.map((s, i) => {
+    const c = CATEGORIES[s.category];
+    // waveform bars — random heights seeded by id for stability
+    const bars = genWaveBars(s.id);
+    return `
+      <div class="lib-sound" onclick="openSoundDetail('${s.id}')">
+        <div class="ls-index">${String(i + 1).padStart(2, '0')}</div>
+        <div class="ls-wave ${c.cls}">${bars}</div>
+        <div class="ls-info">
+          <div class="ls-name">${s.name}</div>
+          <div class="ls-meta">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            <span>${s.location}</span>
+            <span class="ls-dot">·</span>
+            <span>${s.duration}s</span>
+          </div>
+        </div>
+        <div class="ls-play">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function genWaveBars(seed) {
+  // deterministic pseudo-random from seed string
+  let h = 0;
+  for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) >>> 0;
+  const rnd = () => { h = (h * 1103515245 + 12345) & 0x7fffffff; return h / 0x7fffffff; };
+  let html = '';
+  for (let i = 0; i < 14; i++) {
+    const ht = 20 + Math.round(rnd() * 80);
+    html += '<span style="height:' + ht + '%;"></span>';
+  }
+  return html;
+}
+
+function setLibSort(sort) {
+  state.librarySort = sort;
+  document.querySelectorAll('.library-sort .sort-opt').forEach(o => {
+    o.classList.toggle('active', o.dataset.sort === sort);
+  });
+  renderLibrary();
+}
+
+// category click for library
+document.addEventListener('click', function(e) {
+  const cat = e.target.closest('#libraryCats .lib-cat');
+  if (cat) {
+    state.libraryCat = cat.dataset.cat;
+    renderLibrary();
+  }
+});
+
+// --- Init ---
+function init() {
+  renderNearby();
+  renderWander();
+  buildRecWave();
+  renderProfile();
+  renderLibrary();
+  renderRealMap();
+  // Wheel zoom on the map
+  const wrap = document.getElementById('mapWrap');
+  if (wrap) {
+    wrap.addEventListener('wheel', function(e) {
+      e.preventDefault();
+      if (e.deltaY < 0) zoomIn(); else zoomOut();
+    }, { passive: false });
+
+    // Pinch-to-zoom (two-finger gesture)
+    let pinchStartDist = 0;
+    let pinchStartZoom = 0;
+    let lastPinchRatio = 1;
+    const getDist = (t) => {
+      const dx = t[0].clientX - t[1].clientX;
+      const dy = t[0].clientY - t[1].clientY;
+      return Math.sqrt(dx * dx + dy * dy);
+    };
+    wrap.addEventListener('touchstart', function(e) {
+      if (e.touches.length === 2) {
+        pinchStartDist = getDist(e.touches);
+        pinchStartZoom = mapZoom;
+        lastPinchRatio = 1;
+        e.preventDefault();
+      }
+    }, { passive: false });
+    wrap.addEventListener('touchmove', function(e) {
+      if (e.touches.length === 2 && pinchStartDist > 0) {
+        e.preventDefault();
+        const ratio = getDist(e.touches) / pinchStartDist;
+        // Only trigger zoom when ratio changes enough to avoid jitter
+        if (Math.abs(ratio - lastPinchRatio) > 0.03) {
+          const newZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, +(pinchStartZoom * ratio).toFixed(2)));
+          if (newZoom !== mapZoom) {
+            mapZoom = newZoom;
+            renderRealMap();
+            lastPinchRatio = ratio;
+          }
+        }
+      }
+    }, { passive: false });
+    wrap.addEventListener('touchend', function(e) {
+      if (e.touches.length < 2) {
+        pinchStartDist = 0;
+      }
+    });
+
+    // click on empty map area deactivates point popovers
+    wrap.addEventListener('click', function(e) {
+      if (e.target === wrap || e.target.tagName === 'svg' || e.target.tagName === 'path') {
+        wrap.querySelectorAll('.map-point.active').forEach(d => d.classList.remove('active'));
+      }
+    });
+  }
+}
+
+// 确保地图容器尺寸就绪后再渲染（避免首次渲染时宽高为 0）
+window.addEventListener('load', function() {
+  if (!mapInfo) renderRealMap();
+});
+
+init();
+</script>
+
+</body>
+</html>
