@@ -611,7 +611,7 @@ function renderNearby() {
     : SOUNDS.filter(s => s.category === state.activeCategory);
   list.innerHTML = sounds.map(s => `
     <div class="sound-card" onclick="openSoundDetail('${s.id}')">
-      <div class="thumb" style="background-image:url('${s.cover}');">
+      <div class="thumb" style="background-image:url('${encodeURI(s.cover)}');">
         <div class="play-icon">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
         </div>
@@ -884,7 +884,7 @@ function renderSoundDetail(sid) {
   // cover
   const coverBg = document.getElementById('detailCoverBg');
   coverBg.className = 'cover-bg';
-  coverBg.style.backgroundImage = s.cover ? `url('${s.cover}')` : '';
+  coverBg.style.backgroundImage = s.cover ? `url('${encodeURI(s.cover)}')` : '';
 
   // reset audio element
   if (state.audioEl) {
@@ -1002,7 +1002,7 @@ function renderWander() {
     }).join('');
     return `
       <div class="route-card" onclick="openRouteDetail('${r.id}')">
-        <div class="route-cover" style="background-image:url('${r.cover}');">
+        <div class="route-cover" style="background-image:url('${encodeURI(r.cover)}');">
           <div class="cover-wave"></div>
         </div>
         <div class="rc-body">
@@ -1024,7 +1024,7 @@ function renderRouteDetail(rid) {
   if (!r) return;
   const hero = document.getElementById('routeHero');
   hero.innerHTML = `
-    <div class="rd-cover" style="background-image:url('${r.cover}');">
+    <div class="rd-cover" style="background-image:url('${encodeURI(r.cover)}');">
       <div class="cover-wave"></div>
     </div>
     <div class="rd-info">
@@ -1269,7 +1269,7 @@ function renderProfile() {
       const click = (r.status === 'published' && matched) ? `openSoundDetail('${matched.id}')` : '';
       return `
         <div class="sound-card" onclick="${click}">
-          <div class="thumb" style="background-image:url('${cover}');"></div>
+          <div class="thumb" style="background-image:url('${encodeURI(cover)}');"></div>
           <div class="info">
             <div class="name">${r.name}</div>
             <div class="meta">
@@ -1290,7 +1290,7 @@ function renderProfile() {
       const cover = matched ? matched.cover : 'images/鼓山.jpg';
       return `
       <div class="sound-card">
-        <div class="thumb" style="background-image:url('${cover}');"></div>
+        <div class="thumb" style="background-image:url('${encodeURI(cover)}');"></div>
         <div class="info">
           <div class="name">${r.name}</div>
           <div class="meta"><span>${r.location}</span></div>
@@ -1304,7 +1304,7 @@ function renderProfile() {
     const favs = SOUNDS.filter(s => FAVORITES.indexOf(s.id) >= 0);
     items = favs.length ? favs.map(s => `
       <div class="sound-card" onclick="openSoundDetail('${s.id}')">
-        <div class="thumb" style="background-image:url('${s.cover}');"></div>
+        <div class="thumb" style="background-image:url('${encodeURI(s.cover)}');"></div>
         <div class="info">
           <div class="name">${s.name}</div>
           <div class="meta"><span>${s.location}</span><span>·</span>${catTag(s.category)}</div>
